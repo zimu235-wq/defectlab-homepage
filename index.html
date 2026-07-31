@@ -52,19 +52,18 @@
       </div>
 
       <div class="server-main">
-        <div class="connection-card">
-          <span>服务器地址</span>
-          <code id="server-address">defectlab.xyz:25565</code>
-          <p>需要可用的 IPv6 网络和与服务器匹配的客户端整合包。</p>
+        <div class="connection-card player-roster-card">
+          <span>当前在线</span>
+          <div class="player-count-row">
+            <strong class="player-total"><b id="players-online">--</b><small> / <span id="players-max">--</span></small></strong>
+          </div>
+          <div class="player-avatars" id="player-avatars" aria-label="当前在线玩家"></div>
         </div>
 
         <div class="metrics" aria-label="服务器实时状态">
           <article>
-            <span>当前在线</span>
-            <div class="player-count-row">
-              <strong><b id="players-online">--</b><small> / <span id="players-max">--</span></small></strong>
-              <div class="player-avatars" id="player-avatars" aria-label="当前在线玩家"></div>
-            </div>
+            <span>服务器地址</span>
+            <strong class="text-value server-address-value"><code id="server-address">defectlab.xyz:25565</code></strong>
           </article>
           <article>
             <span>网络延迟</span>

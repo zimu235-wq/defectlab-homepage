@@ -114,12 +114,22 @@ function renderPlayerAvatars(items, onlineCount) {
   const visiblePlayers = players.slice(0, 6);
   elements.playerAvatars.replaceChildren();
 
+  if (Number(onlineCount || 0) === 0) {
+    const empty = document.createElement("p");
+    empty.className = "player-empty";
+    empty.textContent = "暂无玩家在线";
+    elements.playerAvatars.append(empty);
+    return;
+  }
+
   visiblePlayers.forEach((player) => {
     const name = String(player?.name || "玩家").trim();
     const identity = String(player?.id || name).replaceAll("-", "");
+    const entry = document.createElement("div");
+    entry.className = "player-entry";
+    entry.title = name;
     const avatar = document.createElement("span");
     avatar.className = "player-avatar";
-    avatar.title = name;
 
     const image = document.createElement("img");
     image.src = `https://mc-heads.net/avatar/${encodeURIComponent(identity)}/40`;
@@ -132,17 +142,27 @@ function renderPlayerAvatars(items, onlineCount) {
     const fallback = document.createElement("span");
     fallback.className = "avatar-fallback";
     fallback.textContent = name.slice(0, 1).toUpperCase();
+    const label = document.createElement("span");
+    label.className = "player-name";
+    label.textContent = name;
     avatar.append(image, fallback);
-    elements.playerAvatars.append(avatar);
+    entry.append(avatar, label);
+    elements.playerAvatars.append(entry);
   });
 
   const hiddenCount = Math.max(0, Number(onlineCount || 0) - visiblePlayers.length);
   if (hiddenCount > 0) {
+    const entry = document.createElement("div");
+    entry.className = "player-entry";
     const more = document.createElement("span");
     more.className = "player-avatar more";
     more.textContent = `+${hiddenCount}`;
-    more.title = players.length ? `还有 ${hiddenCount} 名玩家在线` : "服务器未公开玩家名称";
-    elements.playerAvatars.append(more);
+    const label = document.createElement("span");
+    label.className = "player-name";
+    label.textContent = players.length ? "更多玩家" : "名单未公开";
+    entry.title = players.length ? `还有 ${hiddenCount} 名玩家在线` : "服务器未公开玩家名称";
+    entry.append(more, label);
+    elements.playerAvatars.append(entry);
   }
 }
 

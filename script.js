@@ -124,7 +124,9 @@ function renderPlayerAvatars(items, onlineCount) {
 
   visiblePlayers.forEach((player) => {
     const name = String(player?.name || "玩家").trim();
-    const identity = String(player?.id || name).replaceAll("-", "");
+    // This server runs in offline mode, so status UUIDs do not map to Mojang skins.
+    // Resolve the public skin by player name instead.
+    const identity = name;
     const entry = document.createElement("div");
     entry.className = "player-entry";
     entry.title = name;

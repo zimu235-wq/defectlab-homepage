@@ -19,6 +19,13 @@ const elements = {
   loader: document.querySelector("#server-loader"),
   modpack: document.querySelector("#current-modpack"),
   modpackVersion: document.querySelector("#current-modpack-version"),
+  backupState: document.querySelector("#backup-state"),
+  backupStateText: document.querySelector("#backup-state-text"),
+  backupDescription: document.querySelector("#backup-description"),
+  backupLastSuccess: document.querySelector("#backup-last-success"),
+  backupCount: document.querySelector("#backup-count"),
+  backupStorage: document.querySelector("#backup-storage"),
+  backupPolicy: document.querySelector("#backup-policy"),
   packSelect: document.querySelector("#modpack-select"),
   packMeta: document.querySelector("#modpack-meta"),
   packDownload: document.querySelector("#modpack-download"),
@@ -72,6 +79,40 @@ function formatUpdateTime(value) {
     second: "2-digit",
     hour12: false,
   }).format(date);
+}
+
+function formatBackupTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "尚无成功备份";
+  return new Intl.DateTimeFormat("zh-CN", {
+    timeZone: "Asia/Shanghai",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
+function renderBackup(backup) {
+  const value = backup && typeof backup === "object" ? backup : {};
+  const labels = {
+    healthy: ["healthy", "保护正常", "最近的增量快照已完成并通过记录校验。"],
+    running: ["running", "正在备份", "正在安全刷盘并创建增量快照。"],
+    restoring: ["running", "正在恢复", "管理员正在执行受控存档恢复。"],
+    stale: ["warning", "备份延迟", "超过预定时间没有新的成功快照。"],
+    error: ["error", "备份异常", "最近一次备份或维护未能正常完成。"],
+    unavailable: ["warning", "尚未启用", "暂时无法读取备份状态。"],
+  };
+  const [className, label, description] = labels[value.state] || labels.unavailable;
+  elements.backupState.className = `backup-state ${className}`;
+  elements.backupStateText.textContent = label;
+  elements.backupDescription.textContent = description;
+  elements.backupLastSuccess.textContent = formatBackupTime(value.last_success_at);
+  elements.backupCount.textContent = Number.isFinite(value.snapshot_count) ? value.snapshot_count : "--";
+  elements.backupStorage.textContent = formatBytes(value.repository_bytes);
+  const interval = value.policy?.interval_hours || 2;
+  elements.backupPolicy.textContent = `每 ${interval} 小时`;
 }
 
 function setServerState(state) {
@@ -188,6 +229,7 @@ function renderStatus(payload, networkMs) {
     elements.modpack.textContent = matchedPack.name;
     elements.modpackVersion.textContent = matchedPack.version;
   }
+  renderBackup(payload.backup);
   renderModpacks(payload.modpacks);
 }
 
@@ -208,6 +250,7 @@ async function refreshStatus() {
     elements.max.textContent = "--";
     renderPlayerAvatars([], 0);
     elements.latency.textContent = "--";
+    renderBackup({ state: "unavailable" });
   } finally {
     elements.refresh.disabled = false;
   }

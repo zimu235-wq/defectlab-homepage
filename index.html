@@ -101,11 +101,26 @@
     </section>
 
     <section class="assistant-panel" aria-labelledby="assistant-title">
-      <div>
-        <p class="eyebrow">ASTRBOT</p>
-        <h2 id="assistant-title">智能助手网页接入</h2>
+      <div class="assistant-head">
+        <div>
+          <p class="eyebrow">ASTRBOT</p>
+          <h2 id="assistant-title">智能助手</h2>
+        </div>
+        <span class="visitor-badge"><span aria-hidden="true"></span>公开访客模式</span>
       </div>
-      <span class="pending-badge">安全接口待接入</span>
+
+      <div class="chat-log" id="chat-log" aria-live="polite" aria-label="聊天记录">
+        <div class="chat-message bot">你好，我是 Defect Lab 的 AstrBot。有什么想聊的？</div>
+      </div>
+
+      <form class="chat-form" id="chat-form">
+        <label class="sr-only" for="chat-input">输入聊天消息</label>
+        <textarea id="chat-input" rows="2" maxlength="300" placeholder="输入消息…" required></textarea>
+        <div class="chat-form-footer">
+          <span><b id="chat-count">0</b>/300 · 每 10 分钟最多 5 条</span>
+          <button type="submit" id="chat-send">发送</button>
+        </div>
+      </form>
     </section>
   </main>
 

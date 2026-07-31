@@ -1,4 +1,5 @@
 const STATUS_API = "https://dl.defectlab.xyz:20443/api/public/minecraft";
+const CHAT_API = "https://dl.defectlab.xyz:20443/api/public/chat";
 
 const elements = {
   clock: document.querySelector("#server-time"),
@@ -20,9 +21,15 @@ const elements = {
   packSelect: document.querySelector("#modpack-select"),
   packMeta: document.querySelector("#modpack-meta"),
   packDownload: document.querySelector("#modpack-download"),
+  chatLog: document.querySelector("#chat-log"),
+  chatForm: document.querySelector("#chat-form"),
+  chatInput: document.querySelector("#chat-input"),
+  chatCount: document.querySelector("#chat-count"),
+  chatSend: document.querySelector("#chat-send"),
 };
 
 let modpacks = [];
+let chatHistory = [];
 let toastTimer;
 
 function updateClock() {
@@ -146,6 +153,65 @@ async function refreshStatus() {
   }
 }
 
+function appendChatMessage(role, text, extraClass = "") {
+  const message = document.createElement("div");
+  message.className = `chat-message ${role} ${extraClass}`.trim();
+  message.textContent = text;
+  elements.chatLog.append(message);
+  elements.chatLog.scrollTop = elements.chatLog.scrollHeight;
+  return message;
+}
+
+function updateChatCount() {
+  elements.chatCount.textContent = elements.chatInput.value.length;
+}
+
+async function sendChatMessage(event) {
+  event.preventDefault();
+  const message = elements.chatInput.value.trim();
+  if (!message || elements.chatSend.disabled) return;
+
+  const historyForRequest = chatHistory.slice(-16);
+  appendChatMessage("user", message);
+  chatHistory.push({ role: "user", content: message });
+  elements.chatInput.value = "";
+  updateChatCount();
+  elements.chatSend.disabled = true;
+  elements.chatInput.disabled = true;
+  const typing = appendChatMessage("bot", "正在回复…", "typing");
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 70000);
+
+  try {
+    const response = await fetch(CHAT_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, history: historyForRequest }),
+      signal: controller.signal,
+    });
+    const payload = await response.json().catch(() => ({}));
+    typing.remove();
+    if (!response.ok) {
+      appendChatMessage("error", payload.message || "发送失败，请稍后再试。", "error");
+      return;
+    }
+    const reply = String(payload.reply || "").trim();
+    if (!reply) throw new Error("empty reply");
+    appendChatMessage("bot", reply);
+    chatHistory.push({ role: "assistant", content: reply });
+    chatHistory = chatHistory.slice(-16);
+  } catch (error) {
+    typing.remove();
+    const messageText = error.name === "AbortError" ? "回复超时，请稍后再试。" : "机器人暂时无法连接。";
+    appendChatMessage("error", messageText, "error");
+  } finally {
+    clearTimeout(timer);
+    elements.chatSend.disabled = false;
+    elements.chatInput.disabled = false;
+    elements.chatInput.focus();
+  }
+}
+
 document.querySelectorAll("[data-copy]").forEach((button) => {
   button.addEventListener("click", async () => {
     const value = button.dataset.copy;
@@ -160,6 +226,14 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
 
 elements.packSelect.addEventListener("change", updateSelectedPack);
 elements.refresh.addEventListener("click", refreshStatus);
+elements.chatForm.addEventListener("submit", sendChatMessage);
+elements.chatInput.addEventListener("input", updateChatCount);
+elements.chatInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+    event.preventDefault();
+    elements.chatForm.requestSubmit();
+  }
+});
 updateClock();
 setInterval(updateClock, 1000);
 refreshStatus();

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Defect Lab 游戏、自动化与知识服务入口">
+  <meta name="theme-color" content="#07111f">
+  <meta property="og:title" content="Defect Lab · 服务器首页">
+  <meta property="og:description" content="FarmingTales、机器人与知识服务的统一入口。">
+  <meta property="og:image" content="https://www.defectlab.xyz/og.png">
+  <title>Defect Lab · 服务器首页</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./script.js" defer></script>
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Defect Lab 首页">
+      <span class="brand-mark">D</span>
+      <span><strong>DEFECT LAB</strong><small>PRIVATE SERVER</small></span>
+    </a>
+    <div class="server-state">
+      <span class="pulse" aria-hidden="true"></span>
+      <span>服务入口</span>
+      <time id="server-time">--:--:--</time>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">GAME · AUTOMATION · KNOWLEDGE</p>
+        <h1>一台服务器，<br><span>汇聚所有想法。</span></h1>
+        <p class="intro">
+          FarmingTales、机器人与知识服务的统一入口。公开服务可直接访问，
+          管理功能仅向已加入 Tailnet 的成员开放。
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#services">浏览服务</a>
+          <button class="button ghost" type="button" data-copy="defectlab.xyz:25565">复制 MC 地址</button>
+        </div>
+      </div>
+
+      <aside class="status-card" aria-label="当前设备访问环境">
+        <div class="status-head">
+          <span>ACCESS CHECK</span>
+          <button id="check-services" type="button">重新检测</button>
+        </div>
+        <div class="access-summary">
+          <span class="access-icon">↗</span>
+          <div>
+            <strong id="network-summary">等待检测</strong>
+            <small id="network-detail">正在检查当前网络能否连接服务器服务</small>
+          </div>
+        </div>
+        <ul class="check-list" id="check-list">
+          <li data-check="download"><span>客户端下载</span><b>待检测</b></li>
+          <li data-check="astrbot"><span>AstrBot</span><b>待检测</b></li>
+          <li data-check="book"><span>书库</span><b>待检测</b></li>
+        </ul>
+        <p class="status-note">检测失败通常表示当前网络没有 IPv6，或服务器入口暂时不可达。</p>
+      </aside>
+    </section>
+
+    <section class="section" id="services">
+      <div class="section-title">
+        <div><p class="eyebrow">PUBLIC SERVICES</p><h2>公开服务</h2></div>
+        <p>无需加入 Tailnet</p>
+      </div>
+
+      <div class="service-grid">
+        <article class="service-card featured">
+          <div class="card-top">
+            <span class="service-icon">FT</span>
+            <span class="tag green">JAVA</span>
+          </div>
+          <div>
+            <p class="card-kicker">MINECRAFT · FORGE 1.20.1</p>
+            <h3>FarmingTales Forge II</h3>
+            <p>整合包生存服务器。请先安装对应客户端，再使用下面的地址加入。</p>
+          </div>
+          <div class="address-row">
+            <code>defectlab.xyz:25565</code>
+            <button type="button" data-copy="defectlab.xyz:25565">复制</button>
+          </div>
+        </article>
+
+        <a class="service-card link-card" href="https://dl.defectlab.xyz:20443/" target="_blank" rel="noreferrer">
+          <div class="card-top"><span class="service-icon cyan">DL</span><span class="arrow">↗</span></div>
+          <div><p class="card-kicker">DOWNLOAD</p><h3>客户端下载</h3><p>获取 FarmingTales 客户端包与安装文件。</p></div>
+          <span class="open-label">打开服务</span>
+        </a>
+
+        <a class="service-card link-card" href="https://as.defectlab.xyz:18443/" target="_blank" rel="noreferrer">
+          <div class="card-top"><span class="service-icon violet">AI</span><span class="arrow">↗</span></div>
+          <div><p class="card-kicker">ASTRBOT</p><h3>智能助手</h3><p>机器人、日常协作与文档处理入口。</p></div>
+          <span class="open-label">打开服务</span>
+        </a>
+
+        <a class="service-card link-card" href="https://book.defectlab.xyz:21443/admin" target="_blank" rel="noreferrer">
+          <div class="card-top"><span class="service-icon amber">KB</span><span class="arrow">↗</span></div>
+          <div><p class="card-kicker">KNOWLEDGE BASE</p><h3>书库 RAG</h3><p>私有文档检索、管理与问答服务。</p></div>
+          <span class="open-label">打开服务</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="section management">
+      <div class="section-title">
+        <div><p class="eyebrow">TAILNET ONLY</p><h2>授权管理</h2></div>
+        <p><span class="lock">●</span> 必须先连接 Tailscale</p>
+      </div>
+
+      <div class="management-list">
+        <a href="http://100.88.165.33:10086" target="_blank" rel="noreferrer">
+          <span class="management-index">01</span>
+          <span><strong>1Panel</strong><small>系统、容器与网站管理</small></span>
+          <span class="management-link">打开 ↗</span>
+        </a>
+        <a href="http://100.88.165.33:10087" target="_blank" rel="noreferrer">
+          <span class="management-index">02</span>
+          <span><strong>Pterodactyl</strong><small>Minecraft 实例、控制台与文件</small></span>
+          <span class="management-link">打开 ↗</span>
+        </a>
+        <a href="http://100.88.165.33:6185" target="_blank" rel="noreferrer">
+          <span class="management-index">03</span>
+          <span><strong>AstrBot</strong><small>机器人配置与会话管理</small></span>
+          <span class="management-link">打开 ↗</span>
+        </a>
+        <a href="http://100.88.165.33:6099/webui/" target="_blank" rel="noreferrer">
+          <span class="management-index">04</span>
+          <span><strong>NapCat</strong><small>QQ 连接与适配器管理</small></span>
+          <span class="management-link">打开 ↗</span>
+        </a>
+      </div>
+      <div class="management-help">
+        <strong>管理入口打不开？</strong>
+        <span>先打开 Tailscale，确认状态为 Connected，并登录与你们服务器相同的 Tailnet。</span>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>© 2026 DEFECT LAB</span>
+    <span>Public services outside. Management inside Tailnet.</span>
+  </footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

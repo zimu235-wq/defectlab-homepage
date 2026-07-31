@@ -21,6 +21,7 @@ const elements = {
   backupEnabled: document.querySelector("#backup-enabled"),
   backupCount: document.querySelector("#backup-count"),
   packSelect: document.querySelector("#modpack-select"),
+  packSingle: document.querySelector("#modpack-single"),
   packDownload: document.querySelector("#modpack-download"),
   chatLog: document.querySelector("#chat-log"),
   chatForm: document.querySelector("#chat-form"),
@@ -30,12 +31,34 @@ const elements = {
 };
 
 let servers = [];
-let selectedServerId = "";
+let selectedServerId = getPreferredServerId();
 let modpacks = [];
 let latestNetworkMs = "--";
 let latestUpdatedAt = null;
 let chatHistory = [];
 let toastTimer;
+
+function getPreferredServerId() {
+  const fromUrl = new URLSearchParams(window.location.search).get("server");
+  if (fromUrl) return fromUrl;
+  try {
+    return window.localStorage.getItem("defectlab-selected-server") || "";
+  } catch {
+    return "";
+  }
+}
+
+function rememberSelectedServer() {
+  if (!selectedServerId) return;
+  try {
+    window.localStorage.setItem("defectlab-selected-server", selectedServerId);
+  } catch {
+    // Selection still works when storage is unavailable.
+  }
+  const url = new URL(window.location.href);
+  url.searchParams.set("server", selectedServerId);
+  window.history.replaceState(null, "", url);
+}
 
 function updateClock() {
   elements.clock.textContent = new Intl.DateTimeFormat("zh-CN", {
@@ -90,13 +113,13 @@ function renderBackup(backup) {
   }
 
   const labels = {
-    healthy: ["enabled", "已启用"],
-    idle: ["waiting", "已启用 · 等待玩家活动"],
-    running: ["waiting", "已启用 · 正在备份"],
-    restoring: ["waiting", "已启用 · 正在恢复"],
-    stale: ["warning", "已启用 · 备份延迟"],
-    error: ["warning", "已启用 · 异常"],
-    unavailable: ["warning", "已启用 · 状态未知"],
+    healthy: ["enabled", "保护正常"],
+    idle: ["waiting", "等待玩家活动"],
+    running: ["waiting", "正在备份"],
+    restoring: ["waiting", "正在恢复"],
+    stale: ["warning", "备份延迟"],
+    error: ["warning", "备份异常"],
+    unavailable: ["warning", "状态未知"],
   };
   const [className, label] = labels[value.state] || labels.unavailable;
   elements.backupEnabled.className = `backup-enabled ${className}`;
@@ -116,16 +139,34 @@ function updateSelectedPack() {
     elements.packDownload.classList.add("disabled");
     elements.packDownload.setAttribute("aria-disabled", "true");
     elements.packDownload.href = "#";
+    elements.packDownload.textContent = "暂无客户端包";
     return;
   }
   elements.packDownload.href = pack.url;
+  elements.packDownload.textContent = pack.required ? "下载必需客户端" : "下载可选增强包";
   elements.packDownload.classList.remove("disabled");
   elements.packDownload.removeAttribute("aria-disabled");
+}
+
+function formatPackLabel(pack) {
+  const requirement = pack.required ? "必需" : "可选";
+  let name = pack.name;
+  let version = pack.version;
+  if (String(pack.id).startsWith("farmingtales-")) {
+    name = "FarmingTales";
+    version = String(pack.version).replace(/-auth\d+$/i, "");
+  } else if (String(pack.id).startsWith("defectlab-vanilla-plus-")) {
+    name = "Vanilla+";
+    version = String(pack.version).replace(`${pack.minecraft}-`, "");
+  }
+  return `${requirement} · ${name} ${version}`;
 }
 
 function renderModpacks(items) {
   modpacks = Array.isArray(items) ? items : [];
   elements.packSelect.replaceChildren();
+  elements.packSingle.hidden = true;
+  elements.packSelect.hidden = false;
   if (!modpacks.length) {
     const option = new Option("暂无可用整合包", "");
     elements.packSelect.add(option);
@@ -133,9 +174,13 @@ function renderModpacks(items) {
     return;
   }
   modpacks.forEach((pack) => {
-    const requirement = pack.required ? "必需" : "可选";
-    elements.packSelect.add(new Option(`${requirement} · ${pack.name} ${pack.version}`, pack.id));
+    elements.packSelect.add(new Option(formatPackLabel(pack), pack.id));
   });
+  if (modpacks.length === 1) {
+    elements.packSingle.textContent = formatPackLabel(modpacks[0]);
+    elements.packSingle.hidden = false;
+    elements.packSelect.hidden = true;
+  }
   updateSelectedPack();
 }
 
@@ -202,12 +247,14 @@ function renderSelectedServer() {
   const { server, status = {}, backup, modpacks: serverModpacks } = entry;
   selectedServerId = server.id;
   elements.serverSelect.value = selectedServerId;
-  elements.packSummary.textContent = `当前整合包：${server.current_modpack || "未配置"}`;
+  const primaryPack = Array.isArray(serverModpacks) ? serverModpacks[0] : null;
+  const packPrefix = primaryPack?.required ? "所需客户端" : "可选增强包";
+  elements.packSummary.textContent = `${packPrefix}：${server.current_modpack || "未配置"}`;
   elements.address.textContent = server.address;
   document.querySelectorAll("[data-copy]").forEach((button) => {
     button.dataset.copy = server.address;
   });
-  elements.minecraft.textContent = status.version?.name || server.minecraft;
+  elements.minecraft.textContent = server.minecraft;
   elements.online.textContent = status.players?.online ?? 0;
   elements.max.textContent = status.players?.max ?? "--";
   renderPlayerAvatars(status.players?.list, status.players?.online);
@@ -342,6 +389,7 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
 elements.packSelect.addEventListener("change", updateSelectedPack);
 elements.serverSelect.addEventListener("change", () => {
   selectedServerId = elements.serverSelect.value;
+  rememberSelectedServer();
   renderSelectedServer();
 });
 elements.refresh.addEventListener("click", refreshStatus);

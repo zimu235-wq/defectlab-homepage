@@ -41,14 +41,16 @@
             <span class="status-dot" aria-hidden="true"></span>
             <span id="status-text">正在连接</span>
           </div>
-          <label class="eyebrow" id="server-select-label" for="server-select">选择服务器 · JAVA</label>
+          <p class="eyebrow" id="server-edition">MINECRAFT · JAVA 版</p>
+          <label class="sr-only" id="server-select-label" for="server-select">选择服务器</label>
           <div class="server-select-wrap">
             <select id="server-select" aria-describedby="server-pack-summary">
               <option>正在读取服务器…</option>
             </select>
           </div>
           <p class="server-pack-summary" id="server-pack-summary">当前整合包：正在读取…</p>
-          <p class="motd" id="server-motd">正在读取服务器信息…</p>
+          <!-- MOTD remains available for future announcements without duplicating the server name. -->
+          <p class="motd" id="server-motd" hidden>正在读取服务器信息…</p>
         </div>
         <div class="panel-actions">
           <button class="button ghost" type="button" id="refresh-status">刷新状态</button>
@@ -71,7 +73,7 @@
             <strong class="text-value server-address-value"><code id="server-address">defectlab.xyz:25565</code></strong>
           </article>
           <article>
-            <span>网络延迟</span>
+            <span>状态响应</span>
             <strong><b id="network-latency">--</b><small> ms</small></strong>
           </article>
           <article>
@@ -94,7 +96,7 @@
         </div>
         <div class="backup-metrics">
           <article><span>上一次备份</span><strong id="backup-last-success">--</strong></article>
-          <article><span>启用状态</span><strong class="backup-enabled loading" id="backup-enabled">正在检查</strong></article>
+          <article><span>当前状态</span><strong class="backup-enabled loading" id="backup-enabled">正在检查</strong></article>
           <article><span>备份数量</span><strong><b id="backup-count">--</b><small> 个</small></strong></article>
         </div>
       </section>
@@ -105,7 +107,8 @@
           <h3>下载对应客户端包</h3>
         </div>
         <div class="download-controls">
-          <label for="modpack-select">客户端包</label>
+          <label for="modpack-select" id="pack-choice-label">客户端包</label>
+          <div class="pack-choice" id="modpack-single" aria-labelledby="pack-choice-label" hidden></div>
           <select id="modpack-select" aria-label="选择客户端包">
             <option>正在读取…</option>
           </select>

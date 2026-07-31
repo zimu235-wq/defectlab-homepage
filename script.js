@@ -1,7 +1,16 @@
 const services = {
-  download: "https://dl.defectlab.xyz:20443/",
-  astrbot: "https://as.defectlab.xyz:18443/",
-  book: "https://book.defectlab.xyz:21443/admin",
+  download: {
+    url: "https://dl.defectlab.xyz:20443/FarmingTales-ForgeII-1.4.3-client-bundle.zip",
+    method: "HEAD",
+  },
+  astrbot: {
+    url: "https://as.defectlab.xyz:18443/",
+    method: "HEAD",
+  },
+  book: {
+    url: "https://book.defectlab.xyz:21443/admin",
+    method: "GET",
+  },
 };
 
 const clock = document.querySelector("#server-time");
@@ -37,11 +46,12 @@ async function copyText(value) {
   }
 }
 
-async function probe(url) {
+async function probe({ url, method }) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 6000);
   try {
     await fetch(url, {
+      method,
       mode: "no-cors",
       cache: "no-store",
       signal: controller.signal,
@@ -61,11 +71,11 @@ async function checkServices() {
   detail.textContent = "正在逐项连接服务器入口";
 
   const results = await Promise.all(
-    Object.entries(services).map(async ([key, url]) => {
+    Object.entries(services).map(async ([key, service]) => {
       const label = document.querySelector(`[data-check="${key}"] b`);
       label.textContent = "检测中";
       label.className = "";
-      const ok = navigator.onLine && await probe(url);
+      const ok = navigator.onLine && await probe(service);
       label.textContent = ok ? "可连接" : "暂不可达";
       label.className = ok ? "ok" : "fail";
       return ok;

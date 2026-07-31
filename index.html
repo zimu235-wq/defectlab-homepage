@@ -34,15 +34,20 @@
       <h1>服务器状态，<br><span>一眼看清。</span></h1>
     </section>
 
-    <section class="server-panel" aria-labelledby="server-name">
+    <section class="server-panel" aria-labelledby="server-select-label">
       <div class="panel-head">
-        <div>
+        <div class="server-identity">
           <div class="status-pill loading" id="server-status">
             <span class="status-dot" aria-hidden="true"></span>
             <span id="status-text">正在连接</span>
           </div>
-          <p class="eyebrow">PRIMARY SERVER · JAVA</p>
-          <h2 id="server-name">FarmingTales Forge II</h2>
+          <label class="eyebrow" id="server-select-label" for="server-select">选择服务器 · JAVA</label>
+          <div class="server-select-wrap">
+            <select id="server-select" aria-describedby="server-pack-summary">
+              <option>正在读取服务器…</option>
+            </select>
+          </div>
+          <p class="server-pack-summary" id="server-pack-summary">当前整合包：正在读取…</p>
           <p class="motd" id="server-motd">正在读取服务器信息…</p>
         </div>
         <div class="panel-actions">
@@ -80,44 +85,33 @@
         </div>
       </div>
 
-      <div class="server-details">
-        <div><span>加载器</span><strong id="server-loader">Forge</strong></div>
-        <div><span>当前整合包</span><strong id="current-modpack">FarmingTales Forge II</strong></div>
-        <div><span>整合包版本</span><strong id="current-modpack-version">1.4.3</strong></div>
-      </div>
-
       <section class="backup-panel" aria-labelledby="backup-title">
         <div class="backup-heading">
           <div>
             <p class="eyebrow">WORLD PROTECTION</p>
             <h3 id="backup-title">存档备份</h3>
-            <p id="backup-description">正在读取备份状态…</p>
-          </div>
-          <div class="backup-state loading" id="backup-state">
-            <span aria-hidden="true"></span><b id="backup-state-text">正在检查</b>
           </div>
         </div>
         <div class="backup-metrics">
-          <article><span>最近成功</span><strong id="backup-last-success">--</strong></article>
-          <article><span>可恢复时间点</span><strong><b id="backup-count">--</b><small> 个</small></strong></article>
-          <article><span>去重仓库占用</span><strong id="backup-storage">--</strong></article>
-          <article><span>自动策略</span><strong id="backup-policy">每 2 小时</strong></article>
+          <article><span>上一次备份</span><strong id="backup-last-success">--</strong></article>
+          <article><span>启用状态</span><strong class="backup-enabled loading" id="backup-enabled">正在检查</strong></article>
+          <article><span>备份数量</span><strong><b id="backup-count">--</b><small> 个</small></strong></article>
         </div>
       </section>
 
       <div class="download-panel">
         <div>
           <p class="eyebrow">MATCHED CLIENT</p>
-          <h3>下载对应整合包</h3>
+          <h3>下载对应客户端包</h3>
         </div>
         <div class="download-controls">
-          <label for="modpack-select">整合包版本</label>
-          <select id="modpack-select" aria-label="选择整合包版本">
+          <label for="modpack-select">客户端包</label>
+          <select id="modpack-select" aria-label="选择客户端包">
             <option>正在读取…</option>
           </select>
           <span id="modpack-meta">正在读取文件信息</span>
         </div>
-        <a class="download-button disabled" id="modpack-download" href="#" aria-disabled="true">下载整合包</a>
+        <a class="download-button disabled" id="modpack-download" href="#" aria-disabled="true">下载客户端包</a>
       </div>
     </section>
 

@@ -7,7 +7,8 @@ const elements = {
   refresh: document.querySelector("#refresh-status"),
   status: document.querySelector("#server-status"),
   statusText: document.querySelector("#status-text"),
-  name: document.querySelector("#server-name"),
+  serverSelect: document.querySelector("#server-select"),
+  packSummary: document.querySelector("#server-pack-summary"),
   motd: document.querySelector("#server-motd"),
   address: document.querySelector("#server-address"),
   online: document.querySelector("#players-online"),
@@ -16,16 +17,9 @@ const elements = {
   latency: document.querySelector("#network-latency"),
   minecraft: document.querySelector("#minecraft-version"),
   updated: document.querySelector("#last-updated"),
-  loader: document.querySelector("#server-loader"),
-  modpack: document.querySelector("#current-modpack"),
-  modpackVersion: document.querySelector("#current-modpack-version"),
-  backupState: document.querySelector("#backup-state"),
-  backupStateText: document.querySelector("#backup-state-text"),
-  backupDescription: document.querySelector("#backup-description"),
   backupLastSuccess: document.querySelector("#backup-last-success"),
+  backupEnabled: document.querySelector("#backup-enabled"),
   backupCount: document.querySelector("#backup-count"),
-  backupStorage: document.querySelector("#backup-storage"),
-  backupPolicy: document.querySelector("#backup-policy"),
   packSelect: document.querySelector("#modpack-select"),
   packMeta: document.querySelector("#modpack-meta"),
   packDownload: document.querySelector("#modpack-download"),
@@ -36,7 +30,11 @@ const elements = {
   chatSend: document.querySelector("#chat-send"),
 };
 
+let servers = [];
+let selectedServerId = "";
 let modpacks = [];
+let latestNetworkMs = "--";
+let latestUpdatedAt = null;
 let chatHistory = [];
 let toastTimer;
 
@@ -96,24 +94,28 @@ function formatBackupTime(value) {
 
 function renderBackup(backup) {
   const value = backup && typeof backup === "object" ? backup : {};
+  if (value.enabled === false) {
+    elements.backupEnabled.className = "backup-enabled disabled";
+    elements.backupEnabled.textContent = "未启用";
+    elements.backupLastSuccess.textContent = "尚无备份";
+    elements.backupCount.textContent = Number.isFinite(value.snapshot_count) ? value.snapshot_count : 0;
+    return;
+  }
+
   const labels = {
-    healthy: ["healthy", "保护正常", "最近的增量快照已完成并通过记录校验。"],
-    idle: ["idle", "等待玩家活动", "最近没有玩家登录，已跳过空闲备份。"],
-    running: ["running", "正在备份", "正在安全刷盘并创建增量快照。"],
-    restoring: ["running", "正在恢复", "管理员正在执行受控存档恢复。"],
-    stale: ["warning", "备份延迟", "超过预定时间没有新的成功快照。"],
-    error: ["error", "备份异常", "最近一次备份或维护未能正常完成。"],
-    unavailable: ["warning", "尚未启用", "暂时无法读取备份状态。"],
+    healthy: ["enabled", "已启用"],
+    idle: ["waiting", "已启用 · 等待玩家活动"],
+    running: ["waiting", "已启用 · 正在备份"],
+    restoring: ["waiting", "已启用 · 正在恢复"],
+    stale: ["warning", "已启用 · 备份延迟"],
+    error: ["warning", "已启用 · 异常"],
+    unavailable: ["warning", "已启用 · 状态未知"],
   };
-  const [className, label, description] = labels[value.state] || labels.unavailable;
-  elements.backupState.className = `backup-state ${className}`;
-  elements.backupStateText.textContent = label;
-  elements.backupDescription.textContent = description;
+  const [className, label] = labels[value.state] || labels.unavailable;
+  elements.backupEnabled.className = `backup-enabled ${className}`;
+  elements.backupEnabled.textContent = label;
   elements.backupLastSuccess.textContent = formatBackupTime(value.last_success_at);
   elements.backupCount.textContent = Number.isFinite(value.snapshot_count) ? value.snapshot_count : "--";
-  elements.backupStorage.textContent = formatBytes(value.repository_bytes);
-  const interval = value.policy?.interval_hours || 2;
-  elements.backupPolicy.textContent = `每 ${interval} 小时`;
 }
 
 function setServerState(state) {
@@ -129,7 +131,9 @@ function updateSelectedPack() {
     elements.packDownload.href = "#";
     return;
   }
-  elements.packMeta.textContent = `${pack.minecraft} · ${pack.loader} · ${formatBytes(pack.size_bytes)}`;
+  const requirement = pack.required ? "加入服务器必需" : "可选客户端增强";
+  const details = [requirement, `Minecraft ${pack.minecraft}`, formatBytes(pack.size_bytes), pack.description].filter(Boolean);
+  elements.packMeta.textContent = details.join(" · ");
   elements.packDownload.href = pack.url;
   elements.packDownload.classList.remove("disabled");
   elements.packDownload.removeAttribute("aria-disabled");
@@ -146,7 +150,8 @@ function renderModpacks(items) {
     return;
   }
   modpacks.forEach((pack) => {
-    elements.packSelect.add(new Option(`${pack.name} ${pack.version}`, pack.id));
+    const requirement = pack.required ? "必需" : "可选";
+    elements.packSelect.add(new Option(`${requirement} · ${pack.name} ${pack.version}`, pack.id));
   });
   updateSelectedPack();
 }
@@ -208,30 +213,47 @@ function renderPlayerAvatars(items, onlineCount) {
   }
 }
 
-function renderStatus(payload, networkMs) {
-  const { server, status } = payload;
-  elements.name.textContent = server.name;
+function renderSelectedServer() {
+  const entry = servers.find((item) => item.server?.id === selectedServerId) || servers[0];
+  if (!entry) return;
+  const { server, status = {}, backup, modpacks: serverModpacks } = entry;
+  selectedServerId = server.id;
+  elements.serverSelect.value = selectedServerId;
+  elements.packSummary.textContent = `当前整合包：${server.current_modpack || "未配置"}`;
   elements.address.textContent = server.address;
   document.querySelectorAll("[data-copy]").forEach((button) => {
     button.dataset.copy = server.address;
   });
   elements.minecraft.textContent = status.version?.name || server.minecraft;
-  elements.loader.textContent = server.loader;
   elements.online.textContent = status.players?.online ?? 0;
   elements.max.textContent = status.players?.max ?? "--";
   renderPlayerAvatars(status.players?.list, status.players?.online);
-  elements.latency.textContent = networkMs;
-  elements.updated.textContent = formatUpdateTime(payload.updated_at);
+  elements.latency.textContent = latestNetworkMs;
+  elements.updated.textContent = formatUpdateTime(latestUpdatedAt);
   elements.motd.textContent = status.motd || (status.online ? "服务器正在运行" : "服务器当前不可用");
   setServerState(status.online ? "online" : "offline");
 
-  const matchedPack = payload.modpacks?.[0];
-  if (matchedPack) {
-    elements.modpack.textContent = matchedPack.name;
-    elements.modpackVersion.textContent = matchedPack.version;
+  renderBackup(backup);
+  renderModpacks(serverModpacks);
+}
+
+function renderServers(payload, networkMs) {
+  const items = Array.isArray(payload.servers) && payload.servers.length
+    ? payload.servers
+    : [{ server: payload.server, status: payload.status, backup: payload.backup, modpacks: payload.modpacks }];
+  servers = items.filter((item) => item?.server?.id);
+  latestNetworkMs = networkMs;
+  latestUpdatedAt = payload.updated_at;
+  if (!servers.some((item) => item.server.id === selectedServerId)) {
+    selectedServerId = servers[0]?.server?.id || "";
   }
-  renderBackup(payload.backup);
-  renderModpacks(payload.modpacks);
+
+  elements.serverSelect.replaceChildren();
+  servers.forEach((item) => {
+    elements.serverSelect.add(new Option(item.server.name, item.server.id));
+  });
+  elements.serverSelect.disabled = servers.length < 2;
+  renderSelectedServer();
 }
 
 async function refreshStatus() {
@@ -243,7 +265,7 @@ async function refreshStatus() {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const payload = await response.json();
     const networkMs = Math.max(1, Math.round(performance.now() - started));
-    renderStatus(payload, networkMs);
+    renderServers(payload, networkMs);
   } catch {
     setServerState("offline");
     elements.motd.textContent = "无法读取服务器状态，请检查当前网络是否支持 IPv6。";
@@ -251,7 +273,13 @@ async function refreshStatus() {
     elements.max.textContent = "--";
     renderPlayerAvatars([], 0);
     elements.latency.textContent = "--";
-    renderBackup({ state: "unavailable" });
+    if (!servers.length) {
+      elements.packSummary.textContent = "当前整合包：暂时无法读取";
+      elements.backupLastSuccess.textContent = "--";
+      elements.backupEnabled.className = "backup-enabled warning";
+      elements.backupEnabled.textContent = "状态未知";
+      elements.backupCount.textContent = "--";
+    }
   } finally {
     elements.refresh.disabled = false;
   }
@@ -329,6 +357,10 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
 });
 
 elements.packSelect.addEventListener("change", updateSelectedPack);
+elements.serverSelect.addEventListener("change", () => {
+  selectedServerId = elements.serverSelect.value;
+  renderSelectedServer();
+});
 elements.refresh.addEventListener("click", refreshStatus);
 elements.chatForm.addEventListener("submit", sendChatMessage);
 elements.chatInput.addEventListener("input", updateChatCount);

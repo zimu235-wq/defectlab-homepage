@@ -129,7 +129,6 @@ function renderPlayerAvatars(items, onlineCount) {
     const identity = name;
     const entry = document.createElement("div");
     entry.className = "player-entry";
-    entry.title = name;
     const avatar = document.createElement("span");
     avatar.className = "player-avatar";
 
@@ -162,7 +161,6 @@ function renderPlayerAvatars(items, onlineCount) {
     const label = document.createElement("span");
     label.className = "player-name";
     label.textContent = players.length ? "更多玩家" : "名单未公开";
-    entry.title = players.length ? `还有 ${hiddenCount} 名玩家在线` : "服务器未公开玩家名称";
     entry.append(more, label);
     elements.playerAvatars.append(entry);
   }

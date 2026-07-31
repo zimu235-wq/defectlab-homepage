@@ -98,6 +98,7 @@ function renderBackup(backup) {
   const value = backup && typeof backup === "object" ? backup : {};
   const labels = {
     healthy: ["healthy", "保护正常", "最近的增量快照已完成并通过记录校验。"],
+    idle: ["idle", "等待玩家活动", "最近没有玩家登录，已跳过空闲备份。"],
     running: ["running", "正在备份", "正在安全刷盘并创建增量快照。"],
     restoring: ["running", "正在恢复", "管理员正在执行受控存档恢复。"],
     stale: ["warning", "备份延迟", "超过预定时间没有新的成功快照。"],

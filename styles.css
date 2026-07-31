@@ -210,6 +210,7 @@ h1 span { color: var(--cyan); }
 }
 .backup-state span { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
 .backup-state.healthy { border-color: rgba(88,223,150,.28); color: var(--green); }
+.backup-state.idle { border-color: rgba(141,162,181,.28); color: var(--muted); }
 .backup-state.running { border-color: rgba(101,217,239,.28); color: var(--cyan); }
 .backup-state.warning { border-color: rgba(245,190,92,.3); color: #f5be5c; }
 .backup-state.error { border-color: rgba(255,120,134,.3); color: var(--red); }

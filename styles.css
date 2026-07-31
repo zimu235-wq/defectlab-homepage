@@ -196,7 +196,6 @@ h1 span { color: var(--cyan); }
   background: rgba(14, 26, 39, .58);
 }
 .assistant-panel h2 { margin-bottom: 5px; font-size: 1.4rem; }
-.assistant-panel p:last-child { max-width: 720px; margin-bottom: 0; color: var(--muted); font-size: .84rem; }
 .pending-badge {
   flex: 0 0 auto;
   padding: 7px 11px;

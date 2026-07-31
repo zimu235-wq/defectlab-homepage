@@ -60,8 +60,11 @@
 
         <div class="metrics" aria-label="服务器实时状态">
           <article>
-            <span>在线人数</span>
-            <strong><b id="players-online">--</b><small> / <span id="players-max">--</span></small></strong>
+            <span>当前在线</span>
+            <div class="player-count-row">
+              <strong><b id="players-online">--</b><small> / <span id="players-max">--</span></small></strong>
+              <div class="player-avatars" id="player-avatars" aria-label="当前在线玩家"></div>
+            </div>
           </article>
           <article>
             <span>网络延迟</span>

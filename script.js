@@ -12,6 +12,7 @@ const elements = {
   address: document.querySelector("#server-address"),
   online: document.querySelector("#players-online"),
   max: document.querySelector("#players-max"),
+  playerAvatars: document.querySelector("#player-avatars"),
   latency: document.querySelector("#network-latency"),
   minecraft: document.querySelector("#minecraft-version"),
   updated: document.querySelector("#last-updated"),
@@ -108,6 +109,43 @@ function renderModpacks(items) {
   updateSelectedPack();
 }
 
+function renderPlayerAvatars(items, onlineCount) {
+  const players = Array.isArray(items) ? items : [];
+  const visiblePlayers = players.slice(0, 6);
+  elements.playerAvatars.replaceChildren();
+
+  visiblePlayers.forEach((player) => {
+    const name = String(player?.name || "玩家").trim();
+    const identity = String(player?.id || name).replaceAll("-", "");
+    const avatar = document.createElement("span");
+    avatar.className = "player-avatar";
+    avatar.title = name;
+
+    const image = document.createElement("img");
+    image.src = `https://mc-heads.net/avatar/${encodeURIComponent(identity)}/40`;
+    image.alt = `${name} 的 Minecraft 头像`;
+    image.width = 40;
+    image.height = 40;
+    image.loading = "lazy";
+    image.addEventListener("error", () => avatar.classList.add("failed"), { once: true });
+
+    const fallback = document.createElement("span");
+    fallback.className = "avatar-fallback";
+    fallback.textContent = name.slice(0, 1).toUpperCase();
+    avatar.append(image, fallback);
+    elements.playerAvatars.append(avatar);
+  });
+
+  const hiddenCount = Math.max(0, Number(onlineCount || 0) - visiblePlayers.length);
+  if (hiddenCount > 0) {
+    const more = document.createElement("span");
+    more.className = "player-avatar more";
+    more.textContent = `+${hiddenCount}`;
+    more.title = players.length ? `还有 ${hiddenCount} 名玩家在线` : "服务器未公开玩家名称";
+    elements.playerAvatars.append(more);
+  }
+}
+
 function renderStatus(payload, networkMs) {
   const { server, status } = payload;
   elements.name.textContent = server.name;
@@ -119,6 +157,7 @@ function renderStatus(payload, networkMs) {
   elements.loader.textContent = server.loader;
   elements.online.textContent = status.players?.online ?? 0;
   elements.max.textContent = status.players?.max ?? "--";
+  renderPlayerAvatars(status.players?.list, status.players?.online);
   elements.latency.textContent = networkMs;
   elements.updated.textContent = formatUpdateTime(payload.updated_at);
   elements.motd.textContent = status.motd || (status.online ? "服务器正在运行" : "服务器当前不可用");
@@ -147,6 +186,7 @@ async function refreshStatus() {
     elements.motd.textContent = "无法读取服务器状态，请检查当前网络是否支持 IPv6。";
     elements.online.textContent = "--";
     elements.max.textContent = "--";
+    renderPlayerAvatars([], 0);
     elements.latency.textContent = "--";
   } finally {
     elements.refresh.disabled = false;

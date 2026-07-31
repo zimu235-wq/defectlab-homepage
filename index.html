@@ -34,8 +34,7 @@
         <p class="eyebrow">GAME · AUTOMATION · KNOWLEDGE</p>
         <h1>一台服务器，<br><span>汇聚所有想法。</span></h1>
         <p class="intro">
-          FarmingTales、机器人与知识服务的统一入口。公开服务可直接访问，
-          管理功能仅向已加入 Tailnet 的成员开放。
+          FarmingTales、客户端下载、智能助手与知识服务的统一入口。
         </p>
         <div class="hero-actions">
           <a class="button primary" href="#services">浏览服务</a>
@@ -43,31 +42,12 @@
         </div>
       </div>
 
-      <aside class="status-card" aria-label="当前设备访问环境">
-        <div class="status-head">
-          <span>ACCESS CHECK</span>
-          <button id="check-services" type="button">重新检测</button>
-        </div>
-        <div class="access-summary">
-          <span class="access-icon">↗</span>
-          <div>
-            <strong id="network-summary">等待检测</strong>
-            <small id="network-detail">正在检查当前网络能否连接服务器服务</small>
-          </div>
-        </div>
-        <ul class="check-list" id="check-list">
-          <li data-check="download"><span>客户端下载</span><b>待检测</b></li>
-          <li data-check="astrbot"><span>AstrBot</span><b>待检测</b></li>
-          <li data-check="book"><span>书库</span><b>待检测</b></li>
-        </ul>
-        <p class="status-note">检测失败通常表示当前网络没有 IPv6，或服务器入口暂时不可达。</p>
-      </aside>
     </section>
 
     <section class="section" id="services">
       <div class="section-title">
         <div><p class="eyebrow">PUBLIC SERVICES</p><h2>公开服务</h2></div>
-        <p>无需加入 Tailnet</p>
+        <p>选择服务即可使用</p>
       </div>
 
       <div class="service-grid">
@@ -99,52 +79,18 @@
           <span class="open-label">打开服务</span>
         </a>
 
-        <a class="service-card link-card" href="https://book.defectlab.xyz:21443/admin" target="_blank" rel="noreferrer">
+        <a class="service-card link-card" href="https://book.defectlab.xyz:21443/" target="_blank" rel="noreferrer">
           <div class="card-top"><span class="service-icon amber">KB</span><span class="arrow">↗</span></div>
-          <div><p class="card-kicker">KNOWLEDGE BASE</p><h3>书库 RAG</h3><p>私有文档检索、管理与问答服务。</p></div>
+          <div><p class="card-kicker">KNOWLEDGE BASE</p><h3>书库 RAG</h3><p>文档检索与知识问答服务。</p></div>
           <span class="open-label">打开服务</span>
         </a>
-      </div>
-    </section>
-
-    <section class="section management">
-      <div class="section-title">
-        <div><p class="eyebrow">TAILNET ONLY</p><h2>授权管理</h2></div>
-        <p><span class="lock">●</span> 必须先连接 Tailscale</p>
-      </div>
-
-      <div class="management-list">
-        <a href="http://100.88.165.33:10086" target="_blank" rel="noreferrer">
-          <span class="management-index">01</span>
-          <span><strong>1Panel</strong><small>系统、容器与网站管理</small></span>
-          <span class="management-link">打开 ↗</span>
-        </a>
-        <a href="http://100.88.165.33:10087" target="_blank" rel="noreferrer">
-          <span class="management-index">02</span>
-          <span><strong>Pterodactyl</strong><small>Minecraft 实例、控制台与文件</small></span>
-          <span class="management-link">打开 ↗</span>
-        </a>
-        <a href="http://100.88.165.33:6185" target="_blank" rel="noreferrer">
-          <span class="management-index">03</span>
-          <span><strong>AstrBot</strong><small>机器人配置与会话管理</small></span>
-          <span class="management-link">打开 ↗</span>
-        </a>
-        <a href="http://100.88.165.33:6099/webui/" target="_blank" rel="noreferrer">
-          <span class="management-index">04</span>
-          <span><strong>NapCat</strong><small>QQ 连接与适配器管理</small></span>
-          <span class="management-link">打开 ↗</span>
-        </a>
-      </div>
-      <div class="management-help">
-        <strong>管理入口打不开？</strong>
-        <span>先打开 Tailscale，确认状态为 Connected，并登录与你们服务器相同的 Tailnet。</span>
       </div>
     </section>
   </main>
 
   <footer>
     <span>© 2026 DEFECT LAB</span>
-    <span>Public services outside. Management inside Tailnet.</span>
+    <span>Public services only.</span>
   </footer>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>

@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Defect Lab 游戏、自动化与知识服务入口">
+  <meta name="description" content="Defect Lab Minecraft 服务器状态与整合包下载">
   <meta name="theme-color" content="#07111f">
   <meta property="og:title" content="Defect Lab · 服务器首页">
-  <meta property="og:description" content="FarmingTales、机器人与知识服务的统一入口。">
+  <meta property="og:description" content="查看 Minecraft 服务器状态、在线人数并下载匹配的整合包。">
   <meta property="og:image" content="https://www.defectlab.xyz/og.png">
   <title>Defect Lab · 服务器首页</title>
   <link rel="stylesheet" href="./styles.css">
@@ -19,78 +19,102 @@
   <header class="topbar">
     <a class="brand" href="./" aria-label="Defect Lab 首页">
       <span class="brand-mark">D</span>
-      <span><strong>DEFECT LAB</strong><small>PRIVATE SERVER</small></span>
+      <span><strong>DEFECT LAB</strong><small>GAME SERVER HUB</small></span>
     </a>
     <div class="server-state">
       <span class="pulse" aria-hidden="true"></span>
-      <span>服务入口</span>
+      <span>实时状态</span>
       <time id="server-time">--:--:--</time>
     </div>
   </header>
 
   <main>
     <section class="hero">
-      <div class="hero-copy">
-        <p class="eyebrow">GAME · AUTOMATION · KNOWLEDGE</p>
-        <h1>一台服务器，<br><span>汇聚所有想法。</span></h1>
-        <p class="intro">
-          FarmingTales、客户端下载、智能助手与知识服务的统一入口。
-        </p>
-        <div class="hero-actions">
-          <a class="button primary" href="#services">浏览服务</a>
-          <button class="button ghost" type="button" data-copy="defectlab.xyz:25565">复制 MC 地址</button>
+      <p class="eyebrow">MINECRAFT SERVERS</p>
+      <h1>服务器状态，<br><span>一眼看清。</span></h1>
+      <p class="intro">在线人数、连接延迟、运行版本和对应整合包都集中在同一个面板。</p>
+    </section>
+
+    <section class="server-panel" aria-labelledby="server-name">
+      <div class="panel-head">
+        <div>
+          <div class="status-pill loading" id="server-status">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span id="status-text">正在连接</span>
+          </div>
+          <p class="eyebrow">PRIMARY SERVER · JAVA</p>
+          <h2 id="server-name">FarmingTales Forge II</h2>
+          <p class="motd" id="server-motd">正在读取服务器信息…</p>
+        </div>
+        <div class="panel-actions">
+          <button class="button ghost" type="button" id="refresh-status">刷新状态</button>
+          <button class="button primary" type="button" data-copy="defectlab.xyz:25565">复制地址</button>
         </div>
       </div>
 
+      <div class="server-main">
+        <div class="connection-card">
+          <span>服务器地址</span>
+          <code id="server-address">defectlab.xyz:25565</code>
+          <p>需要可用的 IPv6 网络和与服务器匹配的客户端整合包。</p>
+        </div>
+
+        <div class="metrics" aria-label="服务器实时状态">
+          <article>
+            <span>在线人数</span>
+            <strong><b id="players-online">--</b><small> / <span id="players-max">--</span></small></strong>
+          </article>
+          <article>
+            <span>网络延迟</span>
+            <strong><b id="network-latency">--</b><small> ms</small></strong>
+          </article>
+          <article>
+            <span>Minecraft</span>
+            <strong class="text-value" id="minecraft-version">1.20.1</strong>
+          </article>
+          <article>
+            <span>最后更新</span>
+            <strong class="text-value" id="last-updated">--:--:--</strong>
+          </article>
+        </div>
+      </div>
+
+      <div class="server-details">
+        <div><span>加载器</span><strong id="server-loader">Forge</strong></div>
+        <div><span>当前整合包</span><strong id="current-modpack">FarmingTales Forge II</strong></div>
+        <div><span>整合包版本</span><strong id="current-modpack-version">1.4.3</strong></div>
+      </div>
+
+      <div class="download-panel">
+        <div>
+          <p class="eyebrow">MATCHED CLIENT</p>
+          <h3>下载对应整合包</h3>
+          <p>选择与服务器运行版本一致的客户端。以后添加更多服务器或版本时会自动出现在列表中。</p>
+        </div>
+        <div class="download-controls">
+          <label for="modpack-select">整合包版本</label>
+          <select id="modpack-select" aria-label="选择整合包版本">
+            <option>正在读取…</option>
+          </select>
+          <span id="modpack-meta">正在读取文件信息</span>
+        </div>
+        <a class="download-button disabled" id="modpack-download" href="#" aria-disabled="true">下载客户端</a>
+      </div>
     </section>
 
-    <section class="section" id="services">
-      <div class="section-title">
-        <div><p class="eyebrow">PUBLIC SERVICES</p><h2>公开服务</h2></div>
-        <p>选择服务即可使用</p>
+    <section class="assistant-panel" aria-labelledby="assistant-title">
+      <div>
+        <p class="eyebrow">ASTRBOT</p>
+        <h2 id="assistant-title">智能助手网页接入</h2>
+        <p>现有地址是管理仪表盘，不会直接嵌入公开首页。后续将通过独立、限流的访客聊天接口安全接入。</p>
       </div>
-
-      <div class="service-grid">
-        <article class="service-card featured">
-          <div class="card-top">
-            <span class="service-icon">FT</span>
-            <span class="tag green">JAVA</span>
-          </div>
-          <div>
-            <p class="card-kicker">MINECRAFT · FORGE 1.20.1</p>
-            <h3>FarmingTales Forge II</h3>
-            <p>整合包生存服务器。请先安装对应客户端，再使用下面的地址加入。</p>
-          </div>
-          <div class="address-row">
-            <code>defectlab.xyz:25565</code>
-            <button type="button" data-copy="defectlab.xyz:25565">复制</button>
-          </div>
-        </article>
-
-        <a class="service-card link-card" href="https://dl.defectlab.xyz:20443/FarmingTales-ForgeII-1.4.3-client-bundle.zip" target="_blank" rel="noreferrer">
-          <div class="card-top"><span class="service-icon cyan">DL</span><span class="arrow">↗</span></div>
-          <div><p class="card-kicker">DOWNLOAD</p><h3>客户端下载</h3><p>获取 FarmingTales 客户端包与安装文件。</p></div>
-          <span class="open-label">打开服务</span>
-        </a>
-
-        <a class="service-card link-card" href="https://as.defectlab.xyz:18443/" target="_blank" rel="noreferrer">
-          <div class="card-top"><span class="service-icon violet">AI</span><span class="arrow">↗</span></div>
-          <div><p class="card-kicker">ASTRBOT</p><h3>智能助手</h3><p>机器人、日常协作与文档处理入口。</p></div>
-          <span class="open-label">打开服务</span>
-        </a>
-
-        <a class="service-card link-card" href="https://book.defectlab.xyz:21443/" target="_blank" rel="noreferrer">
-          <div class="card-top"><span class="service-icon amber">KB</span><span class="arrow">↗</span></div>
-          <div><p class="card-kicker">KNOWLEDGE BASE</p><h3>书库 RAG</h3><p>文档检索与知识问答服务。</p></div>
-          <span class="open-label">打开服务</span>
-        </a>
-      </div>
+      <span class="pending-badge">安全接口待接入</span>
     </section>
   </main>
 
   <footer>
     <span>© 2026 DEFECT LAB</span>
-    <span>Public services only.</span>
+    <span>Live data · Public access</span>
   </footer>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>

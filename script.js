@@ -21,7 +21,6 @@ const elements = {
   backupEnabled: document.querySelector("#backup-enabled"),
   backupCount: document.querySelector("#backup-count"),
   packSelect: document.querySelector("#modpack-select"),
-  packMeta: document.querySelector("#modpack-meta"),
   packDownload: document.querySelector("#modpack-download"),
   chatLog: document.querySelector("#chat-log"),
   chatForm: document.querySelector("#chat-form"),
@@ -53,18 +52,6 @@ function showToast(message) {
   elements.toast.classList.add("show");
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => elements.toast.classList.remove("show"), 1800);
-}
-
-function formatBytes(bytes) {
-  if (!Number.isFinite(bytes)) return "文件大小未知";
-  const units = ["B", "KB", "MB", "GB"];
-  let value = bytes;
-  let unit = 0;
-  while (value >= 1024 && unit < units.length - 1) {
-    value /= 1024;
-    unit += 1;
-  }
-  return `${value.toFixed(unit > 1 ? 1 : 0)} ${units[unit]}`;
 }
 
 function formatUpdateTime(value) {
@@ -131,9 +118,6 @@ function updateSelectedPack() {
     elements.packDownload.href = "#";
     return;
   }
-  const requirement = pack.required ? "加入服务器必需" : "可选客户端增强";
-  const details = [requirement, `Minecraft ${pack.minecraft}`, formatBytes(pack.size_bytes), pack.description].filter(Boolean);
-  elements.packMeta.textContent = details.join(" · ");
   elements.packDownload.href = pack.url;
   elements.packDownload.classList.remove("disabled");
   elements.packDownload.removeAttribute("aria-disabled");
@@ -145,7 +129,6 @@ function renderModpacks(items) {
   if (!modpacks.length) {
     const option = new Option("暂无可用整合包", "");
     elements.packSelect.add(option);
-    elements.packMeta.textContent = "请稍后再试";
     updateSelectedPack();
     return;
   }

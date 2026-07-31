@@ -242,7 +242,7 @@ h1 span { color: var(--cyan); }
 }
 .download-panel h3 { margin-bottom: 5px; font-size: 1.35rem; }
 .download-panel p:last-child { margin-bottom: 0; color: var(--muted); font-size: .82rem; }
-.download-controls label, .download-controls span { display: block; color: var(--muted); font-size: .7rem; }
+.download-controls label { display: block; color: var(--muted); font-size: .7rem; }
 .download-controls select {
   width: 100%;
   margin: 7px 0 5px;

@@ -213,7 +213,7 @@ h1 span { color: var(--cyan); }
 }
 .player-empty { margin: 0; color: var(--muted); font-size: .88rem; }
 .backup-panel {
-  margin: 24px 32px 0;
+  margin: 24px 32px;
   padding: 24px;
   border: 1px solid var(--border);
   border-radius: 18px;
@@ -237,7 +237,7 @@ h1 span { color: var(--cyan); }
   grid-template-columns: minmax(0, 1fr) minmax(260px, 340px) auto;
   gap: 28px;
   align-items: center;
-  margin-top: 24px;
+  margin-top: 0;
   padding: 28px 32px;
   border-top: 1px solid var(--border);
   background: rgba(5, 13, 21, .38);

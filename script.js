@@ -92,6 +92,19 @@ function formatUpdateTime(value) {
 function formatBackupTime(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "尚无成功备份";
+  const elapsed = Date.now() - date.getTime();
+  if (elapsed >= 0 && elapsed < 60 * 1000) return "刚刚";
+  if (elapsed >= 0 && elapsed < 60 * 60 * 1000) return `${Math.floor(elapsed / 60000)} 分钟前`;
+  if (elapsed >= 0 && elapsed < 24 * 60 * 60 * 1000) return `${Math.floor(elapsed / 3600000)} 小时前`;
+  if (elapsed >= 0 && elapsed < 48 * 60 * 60 * 1000) {
+    const time = new Intl.DateTimeFormat("zh-CN", {
+      timeZone: "Asia/Shanghai",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(date);
+    return `昨天 ${time}`;
+  }
   return new Intl.DateTimeFormat("zh-CN", {
     timeZone: "Asia/Shanghai",
     month: "2-digit",
@@ -102,12 +115,28 @@ function formatBackupTime(value) {
   }).format(date);
 }
 
+function formatBackupExactTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("zh-CN", {
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
 function renderBackup(backup) {
   const value = backup && typeof backup === "object" ? backup : {};
   if (value.enabled === false) {
     elements.backupEnabled.className = "backup-enabled disabled";
     elements.backupEnabled.textContent = "未启用";
     elements.backupLastSuccess.textContent = "尚无备份";
+    elements.backupLastSuccess.removeAttribute("title");
     elements.backupCount.textContent = Number.isFinite(value.snapshot_count) ? value.snapshot_count : 0;
     return;
   }
@@ -125,6 +154,12 @@ function renderBackup(backup) {
   elements.backupEnabled.className = `backup-enabled ${className}`;
   elements.backupEnabled.textContent = label;
   elements.backupLastSuccess.textContent = formatBackupTime(value.last_success_at);
+  const exactTime = formatBackupExactTime(value.last_success_at);
+  if (exactTime) {
+    elements.backupLastSuccess.title = `北京时间 ${exactTime}`;
+  } else {
+    elements.backupLastSuccess.removeAttribute("title");
+  }
   elements.backupCount.textContent = Number.isFinite(value.snapshot_count) ? value.snapshot_count : "--";
 }
 
@@ -286,9 +321,10 @@ function renderServers(payload, networkMs) {
   renderSelectedServer();
 }
 
-async function refreshStatus() {
-  setServerState("loading");
+async function refreshStatus({ manual = false } = {}) {
+  if (!servers.length) setServerState("loading");
   elements.refresh.disabled = true;
+  if (manual) elements.refresh.textContent = "刷新中…";
   const started = performance.now();
   try {
     const response = await fetch(STATUS_API, { cache: "no-store" });
@@ -296,6 +332,7 @@ async function refreshStatus() {
     const payload = await response.json();
     const networkMs = Math.max(1, Math.round(performance.now() - started));
     renderServers(payload, networkMs);
+    if (manual) showToast("服务器状态已更新");
   } catch {
     setServerState("offline");
     elements.motd.textContent = "无法读取服务器状态，请检查当前网络是否支持 IPv6。";
@@ -310,8 +347,10 @@ async function refreshStatus() {
       elements.backupEnabled.textContent = "状态未知";
       elements.backupCount.textContent = "--";
     }
+    if (manual) showToast("刷新失败，请稍后重试");
   } finally {
     elements.refresh.disabled = false;
+    if (manual) elements.refresh.textContent = "刷新状态";
   }
 }
 
@@ -392,7 +431,7 @@ elements.serverSelect.addEventListener("change", () => {
   rememberSelectedServer();
   renderSelectedServer();
 });
-elements.refresh.addEventListener("click", refreshStatus);
+elements.refresh.addEventListener("click", () => refreshStatus({ manual: true }));
 elements.chatForm.addEventListener("submit", sendChatMessage);
 elements.chatInput.addEventListener("input", updateChatCount);
 elements.chatInput.addEventListener("keydown", (event) => {

@@ -87,6 +87,21 @@
         </div>
       </div>
 
+      <div class="download-panel">
+        <div>
+          <p class="eyebrow">MATCHED CLIENT</p>
+          <h3>客户端下载</h3>
+        </div>
+        <div class="download-controls">
+          <label for="modpack-select" id="pack-choice-label">客户端包</label>
+          <div class="pack-choice" id="modpack-single" aria-labelledby="pack-choice-label" hidden></div>
+          <select id="modpack-select" aria-label="选择客户端包">
+            <option>正在读取…</option>
+          </select>
+        </div>
+        <a class="download-button disabled" id="modpack-download" href="#" aria-disabled="true">下载客户端包</a>
+      </div>
+
       <section class="backup-panel" aria-labelledby="backup-title">
         <div class="backup-heading">
           <div>
@@ -100,21 +115,6 @@
           <article><span>备份数量</span><strong><b id="backup-count">--</b><small> 个</small></strong></article>
         </div>
       </section>
-
-      <div class="download-panel">
-        <div>
-          <p class="eyebrow">MATCHED CLIENT</p>
-          <h3>下载对应客户端包</h3>
-        </div>
-        <div class="download-controls">
-          <label for="modpack-select" id="pack-choice-label">客户端包</label>
-          <div class="pack-choice" id="modpack-single" aria-labelledby="pack-choice-label" hidden></div>
-          <select id="modpack-select" aria-label="选择客户端包">
-            <option>正在读取…</option>
-          </select>
-        </div>
-        <a class="download-button disabled" id="modpack-download" href="#" aria-disabled="true">下载客户端包</a>
-      </div>
     </section>
 
     <!-- Temporarily hidden; remove the hidden attribute to restore the preserved Bot UI. -->

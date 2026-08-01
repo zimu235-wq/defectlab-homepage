@@ -277,11 +277,15 @@ h1 span { color: var(--cyan); }
   text-align: center;
 }
 .download-button.disabled { opacity: .45; pointer-events: none; }
-.game-page .server-panel { margin-bottom: 80px; }
+.game-page .server-panel { margin-top: 58px; margin-bottom: 80px; }
 .hub-main { min-height: calc(100vh - 150px); }
-.hub-hero { max-width: 850px; padding: 96px 0 54px; }
-.hub-hero h1 { margin-bottom: 25px; font-size: clamp(3.3rem, 7vw, 6.2rem); }
-.hub-hero > p:last-child { max-width: 650px; margin-bottom: 0; color: var(--muted); font-size: 1rem; }
+.hub-hero { max-width: 960px; padding: 96px 0 48px; }
+.hub-hero h1 {
+  margin-bottom: 0;
+  font-size: clamp(3.1rem, 6vw, 5rem);
+  letter-spacing: -.045em;
+  white-space: nowrap;
+}
 .service-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; padding-bottom: 86px; }
 .service-card {
   --service-accent: var(--cyan);
@@ -465,12 +469,13 @@ footer { display: flex; justify-content: space-between; padding: 28px 0 38px; bo
 @media (max-width: 620px) {
   .topbar, main, footer { width: min(100% - 24px, 1120px); }
   .topbar { min-height: 0; flex-wrap: wrap; gap: 13px; padding: 14px 0; }
-  .site-nav { display: grid; width: 100%; grid-template-columns: repeat(3, 1fr); }
+  .site-nav { display: grid; width: 100%; grid-template-columns: repeat(2, 1fr); }
   .site-nav a { padding: 8px 5px; text-align: center; }
   .server-state > span:nth-child(2) { display: none; }
   .hero { padding: 64px 0 42px; }
   .hub-hero { padding: 66px 0 42px; }
-  .hub-hero h1 { font-size: clamp(3rem, 16vw, 4.6rem); }
+  .hub-hero h1 { font-size: clamp(2.75rem, 14vw, 4rem); white-space: normal; }
+  .game-page .server-panel { margin-top: 42px; }
   .panel-head, .server-main, .download-panel { padding-inline: 20px; }
   .panel-head { display: block; }
   .panel-actions { margin-top: 24px; }

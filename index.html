@@ -3,176 +3,75 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Defect Lab Minecraft 服务器状态与整合包下载">
+  <meta name="description" content="Defect Lab 服务入口：Minecraft 游戏服务器与医学书库。">
   <meta name="theme-color" content="#07111f">
-  <meta property="og:title" content="Defect Lab · 服务器首页">
-  <meta property="og:description" content="查看 Minecraft 服务器状态、在线人数并下载匹配的整合包。">
+  <meta property="og:title" content="Defect Lab · 服务首页">
+  <meta property="og:description" content="进入 Defect Lab 游戏服务器或医学书库。">
   <meta property="og:image" content="https://www.defectlab.xyz/og.png">
-  <title>Defect Lab · 服务器首页</title>
+  <title>Defect Lab · 服务首页</title>
   <link rel="stylesheet" href="./styles.css">
-  <script src="./script.js" defer></script>
 </head>
-<body>
+<body class="hub-page">
   <div class="ambient ambient-one" aria-hidden="true"></div>
   <div class="ambient ambient-two" aria-hidden="true"></div>
 
   <header class="topbar">
-    <a class="brand" href="./" aria-label="Defect Lab 首页">
+    <a class="brand" href="./" aria-label="Defect Lab 服务首页">
       <span class="brand-mark">D</span>
-      <span><strong>DEFECT LAB</strong><small>GAME SERVER HUB</small></span>
+      <span><strong>DEFECT LAB</strong><small>SERVICE HUB</small></span>
     </a>
-    <div class="server-state">
-      <span class="pulse" aria-hidden="true"></span>
-      <span>实时状态</span>
-      <time id="server-time">--:--:--</time>
-    </div>
+    <nav class="site-nav" aria-label="主要服务">
+      <a class="active" href="./" aria-current="page">首页</a>
+      <a href="./minecraft/">游戏服务器</a>
+      <a href="https://book.defectlab.xyz:21443/" target="_blank" rel="noreferrer">医学书库 <span aria-hidden="true">↗</span></a>
+    </nav>
   </header>
 
-  <main>
-    <section class="hero">
-      <p class="eyebrow">MINECRAFT SERVERS</p>
-      <h1>服务器状态，<br><span>一眼看清。</span></h1>
+  <main class="hub-main">
+    <section class="hub-hero">
+      <p class="eyebrow">DEFECT LAB SERVICES</p>
+      <h1>选择你要进入的<span>服务。</span></h1>
+      <p>游戏服务器与专业知识库各自独立运行，在这里快速前往需要的功能。</p>
     </section>
 
-    <section class="server-panel" aria-labelledby="server-select-label">
-      <div class="panel-head">
-        <div class="server-identity">
-          <div class="status-pill loading" id="server-status">
-            <span class="status-dot" aria-hidden="true"></span>
-            <span id="status-text">正在连接</span>
-          </div>
-          <p class="eyebrow" id="server-edition">MINECRAFT · JAVA 版</p>
-          <label class="sr-only" id="server-select-label" for="server-select">选择服务器</label>
-          <div class="server-select-wrap">
-            <select id="server-select" aria-describedby="server-pack-summary">
-              <option>正在读取服务器…</option>
-            </select>
-          </div>
-          <p class="server-pack-summary" id="server-pack-summary">当前整合包：正在读取…</p>
-          <!-- MOTD remains available for future announcements without duplicating the server name. -->
-          <p class="motd" id="server-motd" hidden>正在读取服务器信息…</p>
+    <section class="service-grid" aria-label="可用服务">
+      <a class="service-card game-service" href="./minecraft/">
+        <div class="service-card-head">
+          <span class="service-icon" aria-hidden="true">MC</span>
+          <span class="service-state"><i></i>公开访问</span>
         </div>
-        <div class="panel-actions">
-          <button class="button ghost" type="button" id="refresh-status">刷新状态</button>
-          <button class="button primary" type="button" data-copy="defectlab.xyz:25565">复制地址</button>
+        <div class="service-card-copy">
+          <p class="eyebrow">GAME SERVERS</p>
+          <h2>游戏服务器</h2>
+          <p>查看 Minecraft 服务器状态、在线玩家，下载匹配客户端并了解存档备份情况。</p>
         </div>
-      </div>
-
-      <div class="server-main">
-        <div class="connection-card player-roster-card">
-          <span>当前在线</span>
-          <div class="player-count-row">
-            <strong class="player-total"><b id="players-online">--</b><small> / <span id="players-max">--</span></small></strong>
-          </div>
-          <div class="player-avatars" id="player-avatars" aria-label="当前在线玩家"></div>
+        <div class="service-meta">
+          <span>实时状态</span><span>客户端</span><span>存档保护</span>
         </div>
-
-        <div class="metrics" aria-label="服务器实时状态">
-          <article>
-            <span>服务器地址</span>
-            <strong class="text-value server-address-value"><code id="server-address">defectlab.xyz:25565</code></strong>
-          </article>
-          <article>
-            <span>状态响应</span>
-            <strong><b id="network-latency">--</b><small> ms</small></strong>
-          </article>
-          <article>
-            <span>Minecraft</span>
-            <strong class="text-value" id="minecraft-version">1.20.1</strong>
-          </article>
-          <article>
-            <span>最后更新</span>
-            <strong class="text-value" id="last-updated">--:--:--</strong>
-          </article>
-        </div>
-      </div>
-
-      <div class="download-panel">
-        <div>
-          <p class="eyebrow">MATCHED CLIENT</p>
-          <h3>客户端下载</h3>
-        </div>
-        <div class="download-controls">
-          <label for="modpack-select" id="pack-choice-label">客户端包</label>
-          <div class="pack-choice" id="modpack-single" aria-labelledby="pack-choice-label" hidden></div>
-          <select id="modpack-select" aria-label="选择客户端包">
-            <option>正在读取…</option>
-          </select>
-        </div>
-        <a class="download-button disabled" id="modpack-download" href="#" aria-disabled="true">下载客户端包</a>
-      </div>
-
-      <section class="backup-panel" aria-labelledby="backup-title">
-        <div class="backup-heading">
-          <div>
-            <p class="eyebrow">WORLD PROTECTION</p>
-            <h3 id="backup-title">存档备份</h3>
-          </div>
-        </div>
-        <div class="backup-metrics">
-          <article><span>上一次备份</span><strong id="backup-last-success">--</strong></article>
-          <article><span>当前状态</span><strong class="backup-enabled loading" id="backup-enabled">正在检查</strong></article>
-          <article><span>备份数量</span><strong><b id="backup-count">--</b><small> 个</small></strong></article>
-        </div>
-      </section>
-    </section>
-
-    <section class="library-panel" aria-labelledby="library-title">
-      <div class="library-visual" aria-hidden="true">
-        <span class="library-spine"></span>
-        <span class="library-pages"></span>
-        <strong>LIBRARY</strong>
-      </div>
-      <div class="library-copy">
-        <div class="library-title-row">
-          <div>
-            <p class="eyebrow">KNOWLEDGE LIBRARY</p>
-            <h2 id="library-title">医学书库</h2>
-          </div>
-          <span class="library-badge">需账号登录</span>
-        </div>
-        <p>基于私有书籍资料进行专业问答，可按书籍范围检索，并在需要时补充可靠网络来源。</p>
-        <div class="library-features" aria-label="书库功能">
-          <span>指定书籍问答</span>
-          <span>书库索引</span>
-          <span>可靠来源补充</span>
-        </div>
-      </div>
-      <a class="library-button" href="https://book.defectlab.xyz:21443/" target="_blank" rel="noreferrer">
-        <span>进入书库</span>
-        <span aria-hidden="true">↗</span>
+        <span class="service-arrow" aria-hidden="true">进入 <b>→</b></span>
       </a>
-    </section>
 
-    <!-- Temporarily hidden; remove the hidden attribute to restore the preserved Bot UI. -->
-    <section class="assistant-panel" aria-labelledby="assistant-title" data-feature="bot" hidden>
-      <div class="assistant-head">
-        <div>
-          <p class="eyebrow">THE DEFECT</p>
-          <h2 id="assistant-title">故障机器人</h2>
+      <a class="service-card library-service" href="https://book.defectlab.xyz:21443/" target="_blank" rel="noreferrer">
+        <div class="service-card-head">
+          <span class="service-icon" aria-hidden="true">LIB</span>
+          <span class="service-state account">需账号登录</span>
         </div>
-        <span class="visitor-badge"><span aria-hidden="true"></span>公开访客模式</span>
-      </div>
-
-      <div class="chat-log" id="chat-log" aria-live="polite" aria-label="聊天记录">
-        <div class="chat-message bot">你好，我是故障机器人（The Defect）。想了解服务器，或者随便聊聊都可以。</div>
-      </div>
-
-      <form class="chat-form" id="chat-form">
-        <label class="sr-only" for="chat-input">输入聊天消息</label>
-        <textarea id="chat-input" rows="2" maxlength="300" placeholder="输入消息…" required></textarea>
-        <div class="chat-form-footer">
-          <span><b id="chat-count">0</b>/300 · 每 10 分钟最多 5 条</span>
-          <button type="submit" id="chat-send">发送</button>
+        <div class="service-card-copy">
+          <p class="eyebrow">KNOWLEDGE LIBRARY</p>
+          <h2>医学书库</h2>
+          <p>基于私有书籍资料进行专业问答，可指定书籍范围检索并补充可靠网络来源。</p>
         </div>
-      </form>
+        <div class="service-meta">
+          <span>书籍问答</span><span>书库索引</span><span>来源补充</span>
+        </div>
+        <span class="service-arrow" aria-hidden="true">进入 <b>↗</b></span>
+      </a>
     </section>
   </main>
 
   <footer>
     <span>© 2026 DEFECT LAB</span>
-    <span>Live data · Public access</span>
+    <span>Independent services · One entrance</span>
   </footer>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

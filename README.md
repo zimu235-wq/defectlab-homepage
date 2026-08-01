@@ -1,8 +1,12 @@
-# Defect Lab game server homepage
+# Defect Lab service hub
 
-Public Minecraft server hub for Defect Lab. It displays live server status,
-player counts, browser-to-server latency, version metadata, and matching
-modpack downloads from a read-only public status endpoint.
+The root site is a lightweight service directory for Defect Lab. The Minecraft
+dashboard lives under `/minecraft/`, while the medical library remains an
+independent authenticated service.
+
+The Minecraft dashboard displays live server status, player counts,
+browser-to-server latency, version metadata, and matching modpack downloads
+from a read-only public status endpoint.
 
 The public API exposes backup health and retention metadata but never exposes
 repository credentials, management links, or restore actions. Backup recovery

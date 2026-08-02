@@ -3,6 +3,8 @@ const CHAT_API = "https://dl.defectlab.xyz:20443/api/public/chat";
 
 const elements = {
   clock: document.querySelector("#server-time"),
+  adminEntry: document.querySelector("#admin-entry"),
+  adminEntryLabel: document.querySelector("#admin-entry-label"),
   toast: document.querySelector("#toast"),
   refresh: document.querySelector("#refresh-status"),
   status: document.querySelector("#server-status"),
@@ -113,6 +115,21 @@ function formatBackupTime(value) {
     minute: "2-digit",
     hour12: false,
   }).format(date);
+}
+
+async function refreshAdminEntry() {
+  if (!elements.adminEntry || !elements.adminEntryLabel) return;
+  try {
+    const response = await fetch("/admin/api/auth/session", { cache: "no-store", credentials: "same-origin" });
+    if (!response.ok) return;
+    const session = await response.json();
+    if (session.authenticated) {
+      elements.adminEntryLabel.textContent = "进入管理台";
+      elements.adminEntry.classList.add("signed-in");
+    }
+  } catch {
+    // The public server page remains usable when the private admin service is unavailable.
+  }
 }
 
 function formatBackupExactTime(value) {
@@ -442,5 +459,6 @@ elements.chatInput.addEventListener("keydown", (event) => {
 });
 updateClock();
 setInterval(updateClock, 1000);
+refreshAdminEntry();
 refreshStatus();
 setInterval(refreshStatus, 30000);

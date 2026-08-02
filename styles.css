@@ -62,6 +62,9 @@ button, a, select { -webkit-tap-highlight-color: transparent; }
 }
 .site-nav a:hover { border-color: var(--border); color: var(--text); }
 .site-nav a.active { background: rgba(84, 223, 241, .09); color: var(--cyan); }
+.site-nav .admin-entry { border-color: rgba(169,129,255,.26); background: rgba(169,129,255,.07); color: #c7afff; }
+.site-nav .admin-entry:hover { border-color: rgba(169,129,255,.52); background: rgba(169,129,255,.12); color: #dbcfff; }
+.admin-lock { margin-right: 5px; font-size: .88rem; }
 .server-state { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: .82rem; }
 .server-state time { padding-left: 10px; border-left: 1px solid var(--border); color: var(--text); }
 .pulse, .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }

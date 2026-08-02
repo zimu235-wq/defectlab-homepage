@@ -1,5 +1,6 @@
 const STATUS_API = "https://dl.defectlab.xyz:20443/api/public/minecraft";
 const CHAT_API = "https://dl.defectlab.xyz:20443/api/public/chat";
+const ADMIN_SESSION_API = "https://defectlab.xyz/admin/api/auth/session";
 
 const elements = {
   clock: document.querySelector("#server-time"),
@@ -16,6 +17,7 @@ const elements = {
   online: document.querySelector("#players-online"),
   max: document.querySelector("#players-max"),
   playerAvatars: document.querySelector("#player-avatars"),
+  playtimeChart: document.querySelector("#playtime-chart"),
   latency: document.querySelector("#network-latency"),
   minecraft: document.querySelector("#minecraft-version"),
   updated: document.querySelector("#last-updated"),
@@ -120,12 +122,13 @@ function formatBackupTime(value) {
 async function refreshAdminEntry() {
   if (!elements.adminEntry || !elements.adminEntryLabel) return;
   try {
-    const response = await fetch("/admin/api/auth/session", { cache: "no-store", credentials: "same-origin" });
+    const response = await fetch(ADMIN_SESSION_API, { cache: "no-store", credentials: "include" });
     if (!response.ok) return;
     const session = await response.json();
     if (session.authenticated) {
-      elements.adminEntryLabel.textContent = "进入管理台";
+      elements.adminEntryLabel.textContent = session.username || "管理员账户";
       elements.adminEntry.classList.add("signed-in");
+      elements.adminEntry.title = `${session.username || "管理员"} · ${session.role?.label || "管理员"}`;
     }
   } catch {
     // The public server page remains usable when the private admin service is unavailable.
@@ -236,6 +239,38 @@ function renderModpacks(items) {
   updateSelectedPack();
 }
 
+function loadPlayerAvatar(image, avatar, name) {
+  const encoded = encodeURIComponent(name);
+  const size = Math.max(40, Number(image.width) || 40);
+  const sources = [
+    `https://mc-heads.net/avatar/${encoded}/${size}`,
+    `https://minotar.net/avatar/${encoded}/${size}`,
+    `https://cravatar.eu/helmavatar/${encoded}/${size}.png`,
+  ];
+  let sourceIndex = 0;
+  let timeoutId;
+
+  const tryNext = () => {
+    clearTimeout(timeoutId);
+    avatar.classList.remove("loaded");
+    if (sourceIndex >= sources.length) {
+      avatar.classList.add("failed");
+      image.removeAttribute("src");
+      return;
+    }
+    avatar.classList.remove("failed");
+    image.src = sources[sourceIndex++];
+    timeoutId = window.setTimeout(tryNext, 6000);
+  };
+
+  image.addEventListener("load", () => {
+    clearTimeout(timeoutId);
+    avatar.classList.add("loaded");
+  });
+  image.addEventListener("error", tryNext);
+  tryNext();
+}
+
 function renderPlayerAvatars(items, onlineCount) {
   const players = Array.isArray(items) ? items : [];
   const visiblePlayers = players.slice(0, 6);
@@ -256,16 +291,17 @@ function renderPlayerAvatars(items, onlineCount) {
     const identity = name;
     const entry = document.createElement("div");
     entry.className = "player-entry";
+    entry.title = player?.id ? `${name}\nUUID：${player.id}` : name;
     const avatar = document.createElement("span");
     avatar.className = "player-avatar";
 
     const image = document.createElement("img");
-    image.src = `https://mc-heads.net/avatar/${encodeURIComponent(identity)}/40`;
     image.alt = `${name} 的 Minecraft 头像`;
     image.width = 40;
     image.height = 40;
     image.loading = "lazy";
-    image.addEventListener("error", () => avatar.classList.add("failed"), { once: true });
+    image.decoding = "async";
+    image.referrerPolicy = "no-referrer";
 
     const fallback = document.createElement("span");
     fallback.className = "avatar-fallback";
@@ -276,6 +312,7 @@ function renderPlayerAvatars(items, onlineCount) {
     avatar.append(image, fallback);
     entry.append(avatar, label);
     elements.playerAvatars.append(entry);
+    loadPlayerAvatar(image, avatar, identity);
   });
 
   const hiddenCount = Math.max(0, Number(onlineCount || 0) - visiblePlayers.length);
@@ -293,10 +330,90 @@ function renderPlayerAvatars(items, onlineCount) {
   }
 }
 
+function formatPlaytime(value) {
+  const seconds = Math.max(0, Number(value) || 0);
+  if (seconds < 60) return "不足 1 分钟";
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  if (hours >= 24) {
+    const days = Math.floor(hours / 24);
+    const remainingHours = hours % 24;
+    return remainingHours ? `${days} 天 ${remainingHours} 小时` : `${days} 天`;
+  }
+  return hours ? `${hours} 小时 ${minutes} 分钟` : `${minutes} 分钟`;
+}
+
+function renderPlaytime(items) {
+  if (!elements.playtimeChart) return;
+  const players = (Array.isArray(items) ? items : []).slice(0, 8);
+  elements.playtimeChart.replaceChildren();
+  elements.playtimeChart.classList.toggle("is-empty", !players.length);
+  if (!players.length) {
+    const empty = document.createElement("p");
+    empty.className = "playtime-empty";
+    empty.textContent = "暂无游玩时长记录";
+    elements.playtimeChart.append(empty);
+    return;
+  }
+
+  const maximum = Math.max(1, ...players.map((player) => Math.max(0, Number(player?.seconds) || 0)));
+  players.forEach((player, index) => {
+    const name = String(player?.name || "玩家").trim();
+    const seconds = Math.max(0, Number(player?.seconds) || 0);
+    const entry = document.createElement("article");
+    entry.className = `playtime-entry rank-${index + 1}`;
+    entry.title = `${name}：${formatPlaytime(seconds)}`;
+
+    const duration = document.createElement("strong");
+    duration.className = "playtime-duration";
+    duration.textContent = formatPlaytime(seconds);
+    const column = document.createElement("div");
+    column.className = "playtime-column";
+    const bar = document.createElement("span");
+    bar.className = "playtime-bar";
+    bar.style.height = `${Math.round(34 + (seconds / maximum) * 126)}px`;
+    column.append(bar);
+
+    const identity = document.createElement("div");
+    identity.className = "playtime-identity";
+    const avatarWrap = document.createElement("span");
+    avatarWrap.className = "playtime-avatar-wrap";
+    const avatar = document.createElement("span");
+    avatar.className = "player-avatar playtime-avatar";
+    const image = document.createElement("img");
+    image.alt = `${name} 的 Minecraft 头像`;
+    image.width = 48;
+    image.height = 48;
+    image.loading = "lazy";
+    image.decoding = "async";
+    image.referrerPolicy = "no-referrer";
+    const fallback = document.createElement("span");
+    fallback.className = "avatar-fallback";
+    fallback.textContent = name.slice(0, 1).toUpperCase();
+    avatar.append(image, fallback);
+    avatarWrap.append(avatar);
+    if (index === 0) {
+      const crown = document.createElement("span");
+      crown.className = "playtime-crown";
+      crown.textContent = "♛";
+      crown.setAttribute("aria-label", "第一名");
+      avatarWrap.append(crown);
+    }
+    const label = document.createElement("b");
+    label.textContent = name;
+    const rank = document.createElement("small");
+    rank.textContent = `第 ${index + 1} 名`;
+    identity.append(avatarWrap, label, rank);
+    entry.append(duration, column, identity);
+    elements.playtimeChart.append(entry);
+    loadPlayerAvatar(image, avatar, name);
+  });
+}
+
 function renderSelectedServer() {
   const entry = servers.find((item) => item.server?.id === selectedServerId) || servers[0];
   if (!entry) return;
-  const { server, status = {}, backup, modpacks: serverModpacks } = entry;
+  const { server, status = {}, backup, modpacks: serverModpacks, playtime } = entry;
   selectedServerId = server.id;
   elements.serverSelect.value = selectedServerId;
   const primaryPack = Array.isArray(serverModpacks) ? serverModpacks[0] : null;
@@ -310,6 +427,7 @@ function renderSelectedServer() {
   elements.online.textContent = status.players?.online ?? 0;
   elements.max.textContent = status.players?.max ?? "--";
   renderPlayerAvatars(status.players?.list, status.players?.online);
+  renderPlaytime(playtime);
   elements.latency.textContent = latestNetworkMs;
   elements.updated.textContent = formatUpdateTime(latestUpdatedAt);
   elements.motd.textContent = status.motd || (status.online ? "服务器正在运行" : "服务器当前不可用");
@@ -322,7 +440,7 @@ function renderSelectedServer() {
 function renderServers(payload, networkMs) {
   const items = Array.isArray(payload.servers) && payload.servers.length
     ? payload.servers
-    : [{ server: payload.server, status: payload.status, backup: payload.backup, modpacks: payload.modpacks }];
+    : [{ server: payload.server, status: payload.status, backup: payload.backup, modpacks: payload.modpacks, playtime: payload.playtime }];
   servers = items.filter((item) => item?.server?.id);
   latestNetworkMs = networkMs;
   latestUpdatedAt = payload.updated_at;

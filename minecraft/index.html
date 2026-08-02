@@ -23,7 +23,7 @@
     </a>
     <nav class="site-nav game-nav" aria-label="游戏服务器页面操作">
       <a class="home-entry" href="../">← 返回首页</a>
-      <a class="admin-entry" id="admin-entry" href="https://dl.defectlab.xyz:20443/admin/">
+      <a class="admin-entry" id="admin-entry" href="https://defectlab.xyz/admin/">
         <span class="admin-lock" aria-hidden="true">◇</span>
         <span id="admin-entry-label">管理员登录</span>
       </a>
@@ -84,6 +84,17 @@
           </article>
         </div>
       </div>
+
+      <section class="playtime-panel" aria-labelledby="playtime-title">
+        <div class="playtime-heading">
+          <div>
+            <p class="eyebrow">PLAYTIME LEADERBOARD</p>
+            <h3 id="playtime-title">在线时长榜</h3>
+          </div>
+          <p>数据来自服务器世界统计，柱形高度代表累计游玩时长。</p>
+        </div>
+        <div class="playtime-chart" id="playtime-chart" aria-live="polite"></div>
+      </section>
 
       <div class="download-panel">
         <div>
